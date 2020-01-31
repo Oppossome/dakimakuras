@@ -1,5 +1,7 @@
-resource.AddFile("materials/models/dakimakura/dakifront.vtf")
-resource.AddFile("materials/models/dakimakura/dakiback.vtf")
+resource.AddSingleFile("materials/models/dakimakura/dakifront.vmt")
+resource.AddSingleFile("materials/models/dakimakura/dakifront.vtf")
+resource.AddSingleFile("materials/models/dakimakura/dakiback.vmt")
+resource.AddSingleFile("materials/models/dakimakura/dakiback.vtf")
 resource.AddFile("models/dakimakura/daki.mdl")
 
 net.Receive("dakimakuras-net", function( Len, Player )
