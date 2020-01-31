@@ -19,6 +19,9 @@ function Dakimakuras.LoadImg( Url, Callback )
 		return  
 	end
 	
+	local UrlMatch = Url:match("http[s]-://.+/.-%.%a+")
+	if( not UrlMatch )then  return  end
+	
 	local ImgPanel = vgui.Create("DHTML")
 	ImgPanel:SetMouseInputEnabled( false )
 	ImgPanel:SetAlpha( 0 )
