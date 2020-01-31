@@ -14,13 +14,11 @@ end
 
 local Queue = {}
 function Dakimakuras.LoadImg( Url, Callback )
+	Url = Url:gsub("&", "&amp;"):gsub("<", "&lt;"):gsub(">", "&gt;"):gsub('"', "&quot;")
 	if( Dakimakuras.ImgCache[ Url ] )then  
 		Callback( Dakimakuras.ImgCache[ Url ] )  
 		return  
 	end
-	
-	local UrlMatch = Url:match("http[s]-://.+/.-%.%a+")
-	if( not UrlMatch )then  return  end
 	
 	local ImgPanel = vgui.Create("DHTML")
 	ImgPanel:SetMouseInputEnabled( false )
