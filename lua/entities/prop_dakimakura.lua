@@ -15,6 +15,7 @@ function ENT:Initialize()
 		self:SetMoveType(MOVETYPE_VPHYSICS)
 		self:PhysicsInit(SOLID_VPHYSICS)
 		self:SetSolid(SOLID_VPHYSICS)
+		self:SetUseType(SIMPLE_USE)
 	else
 		self:OnVarChanged()
 	end
@@ -56,6 +57,12 @@ function ENT:UpdateImages()
 				end
 			end
 		end)
+	end
+end
+
+function ENT:Use( Activator )
+	if( IsValid( Activator ) and Activator:IsPlayer() )then
+		Activator:PickupObject( self )
 	end
 end
 
