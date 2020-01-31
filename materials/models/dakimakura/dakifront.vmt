@@ -1,0 +1,5 @@
+"VertexlitGeneric"
+{
+	"$basetexture" "models/dakimakura/dakifront"
+	"$translucent" 1
+}
