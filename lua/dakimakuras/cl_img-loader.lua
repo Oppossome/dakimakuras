@@ -84,12 +84,6 @@ function Dakimakuras.LoadImg( Url, Callback )
 	end)
 end 
 
-local MatFlags = {
-	["$vertexcolor"] = "1",
-	["$nolod"] = "1",
-	["$model"] = "1",
-}
-
 hook.Add("Think", "Dakimakura-ImgLoad", function()
 	for Ind, Data in pairs( Queue ) do
 		if( Data.Panel:GetHTMLMaterial() and not Data.Panel:IsLoading())then
