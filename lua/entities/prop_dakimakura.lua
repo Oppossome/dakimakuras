@@ -16,8 +16,6 @@ function ENT:Initialize()
 		self:PhysicsInit(SOLID_VPHYSICS)
 		self:SetSolid(SOLID_VPHYSICS)
 		self:SetUseType(SIMPLE_USE)
-	else
-		self:OnVarChanged()
 	end
 end
 
@@ -57,6 +55,17 @@ function ENT:UpdateImages()
 				end
 			end
 		end)
+	end
+end
+
+function ENT:Think()
+	local IsDormant = self:IsDormant()
+	if( IsDormant ~= self.IsDormant )then
+		self.IsDormant = IsDormant
+		
+		if( not IsDormant )then
+			self:UpdateImages()
+		end
 	end
 end
 
