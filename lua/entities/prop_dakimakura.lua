@@ -29,16 +29,13 @@ function ENT:SetupDataTables()
 	self:NetworkVar( "String", 1, "BackImage" )
 	self:NetworkVar( "String", 2, "Degenerate" )
 	
+	if( SERVER )then  return  end
 	self:NetworkVarNotify( "FrontImage", self.OnVarChanged )
 	self:NetworkVarNotify( "BackImage", self.OnVarChanged )
 end
 
 function ENT:OnVarChanged()
-	timer.Simple( 0.5, function()
-		if( IsValid( self ) )then
-			self:UpdateImages()
-		end
-	end)
+	self.NeedUpdate = CurTime() + .1
 end
 
 function ENT:UpdateImages()
@@ -59,11 +56,18 @@ function ENT:UpdateImages()
 end
 
 function ENT:Think()
-	local IsDormant = self:IsDormant()
-	if( IsDormant ~= self.IsDormant )then
-		self.IsDormant = IsDormant
+	if( CLIENT )then
+		local IsDormant = self:IsDormant()
+		if( IsDormant ~= self.DakiDormant )then
+			self.DakiDormant = IsDormant
+			
+			if( not IsDormant )then
+				self.NeedUpdate = CurTime() + .1
+			end
+		end
 		
-		if( not IsDormant )then
+		if( self.NeedUpdate and self.NeedUpdate < CurTime() )then
+			self.NeedUpdate = nil
 			self:UpdateImages()
 		end
 	end
