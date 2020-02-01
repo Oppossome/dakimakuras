@@ -62,7 +62,7 @@ function ENT:Think()
 			self.DakiDormant = IsDormant
 			
 			if( not IsDormant )then
-				self.NeedUpdate = CurTime() + .1
+				self.NeedUpdate = CurTime() + .5
 			end
 		end
 		
