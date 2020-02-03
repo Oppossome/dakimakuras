@@ -14,10 +14,11 @@ function Dakimakuras.RemoveDaki( Front, Back, ShouldSave )
 	end
 end
 
-function Dakimakuras.RegisterDaki( Front, Back )
+function Dakimakuras.RegisterDaki( Front, Back, IsNSFW )
 	Dakimakuras.RemoveDaki( Front, Back )
 	
 	table.insert(Dakimakuras.History, 1, {
+		["IsNSFW"] = IsNSFW;
 		["Front"] = Front;
 		["Back"] = Back;
 	})
@@ -48,12 +49,25 @@ function Dakimakuras.Load()
 	local RawHistory = cookie.GetString("daki-history", "{}" )
 	Dakimakuras.Blacklist = util.JSONToTable( RawBlacklist )
 	Dakimakuras.History = util.JSONToTable( RawHistory )
+	
+	for _, Dakimakura in pairs( Dakimakuras.History ) do
+		Dakimakura.IsNSFW = (Dakimakura.IsNSFW ~= nil and Dakimakura.IsNSFW or false )
+		Dakimakura.Front = Dakimakura.Front or ""
+		Dakimakura.Back = Dakimakura.Back or ""
+	end
 end
 
 hook.Add("InitPostEntity", "Dakimakuras", Dakimakuras.Load)
 
 CreateClientConVar("dakimakura_enable", "1", true, false, "Disable the pesky bodypillows that haunt you in your dreams")
 cvars.AddChangeCallback("dakimakura_enable", function( Name, Old, New )
+	for _, ent in pairs( ents.FindByClass("prop_dakimakura") )do
+		ent:UpdateImages()
+	end
+end)
+
+CreateClientConVar("dakimakura_nsfw", "1", true, false, "Disable this for when the pillows become too hot to handle")
+cvars.AddChangeCallback("dakimakura_nsfw", function( Name, Old, New )
 	for _, ent in pairs( ents.FindByClass("prop_dakimakura") )do
 		ent:UpdateImages()
 	end

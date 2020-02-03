@@ -28,6 +28,7 @@ function ENT:SetupDataTables()
 	self:NetworkVar( "String", 0, "FrontImage" )
 	self:NetworkVar( "String", 1, "BackImage" )
 	self:NetworkVar( "String", 2, "Degenerate" )
+	self:NetworkVar( "Bool", 3, "IsNSFW" )
 	
 	if( SERVER )then  return  end
 	self:NetworkVarNotify( "FrontImage", self.OnVarChanged )
@@ -38,14 +39,21 @@ function ENT:OnVarChanged()
 	self.NeedUpdate = CurTime() + .1
 end
 
+function ENT:ShouldRender()
+	if( not GetConVar("dakimakura_nsfw"):GetBool() and self:GetIsNSFW() )then  return false  end
+	if( not GetConVar("dakimakura_enable"):GetBool() )then  return false  end 
+	if( Dakimakuras.Blacklist[ self:GetDegenerate() ] )then  return false  end
+	return true
+end
+
 function ENT:UpdateImages()
 	if( SERVER )then  return  end
-	local Enabled = GetConVar("dakimakura_enable")
+	
 	
 	for Id, Url in pairs({ self:GetFrontImage(), self:GetBackImage() }) do	
 		Dakimakuras.LoadImg( Url, function( Mat )
 			if( IsValid( self ) )then				
-				if( not Dakimakuras.Blacklist[ self:GetDegenerate() ] and Enabled:GetBool() )then
+				if( self:ShouldRender() )then
 					self:SetSubMaterial( Id - 1, Mat )
 				else
 					self:SetSubMaterial( Id - 1, "" )

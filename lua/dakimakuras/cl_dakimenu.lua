@@ -13,9 +13,10 @@ function DakiMenu:Init()
 		net.Start("dakimakuras-net")
 			net.WriteString( self.FrontEntry:GetValue() )
 			net.WriteString( self.BackEntry:GetValue() )
+			net.WriteBool( self.IsNSFW:GetValue() )
 		net.SendToServer()
-	
-		Dakimakuras.RegisterDaki( self.FrontEntry:GetValue(), self.BackEntry:GetValue() )
+		
+		Dakimakuras.RegisterDaki( self.FrontEntry:GetValue(), self.BackEntry:GetValue(), self.IsNSFW:GetChecked() )
 		self:Close()
 	end
 	
@@ -66,6 +67,22 @@ function DakiMenu:Init()
 	self.FrontEntry.OnLoseFocus = function() self:UpdateDaki() end
 	self.BackEntry.OnLoseFocus = function() self:UpdateDaki() end
 	
+	--> Is Pillow NSFW?
+	self.NSFWPanel = self.Builder:Add("DPanel")
+	self.NSFWPanel.Paint = function()  end
+	self.NSFWPanel:SetTall( 15 )
+	self.NSFWPanel:DockMargin( 0, 3, 0, 0 )
+	self.NSFWPanel:Dock( TOP )
+	
+	self.NSFWLabel = self.NSFWPanel:Add("DLabel")
+	self.NSFWLabel:SetTextColor( Color( 0, 0, 0 ) )
+	self.NSFWLabel:SetText("Is NSFW:")
+	self.NSFWLabel:DockMargin( 5, 0, 0, 0 )
+	self.NSFWLabel:Dock( LEFT )
+	
+	self.IsNSFW = self.NSFWPanel:Add("DCheckBox")
+	self.IsNSFW:Dock( LEFT )
+	
 	--> Start of history tab
 	self.HistoryTab = self.Switcher:Add("DPanel")
 	self.Switcher:AddSheet( "History", self.HistoryTab, "icon16/hourglass.png")
@@ -85,7 +102,7 @@ function DakiMenu:Init()
 	
 	--> Populate History
 	for _, Data in pairs( Dakimakuras.History ) do
-		self:AddHistoryObject( Data.Front, Data.Back )
+		self:AddHistoryObject( Data )
 	end
 	
 	for _, ply in pairs( player.GetAll() ) do
@@ -130,7 +147,7 @@ function DakiMenu:AddBlockButton( Ply )
 	BlockButton.UpdateName()
 end
  
-function DakiMenu:AddHistoryObject( Front, Back )
+function DakiMenu:AddHistoryObject( Data )
 	local DakiModel = ClientsideModel("models/dakimakura/daki.mdl")
 	DakiModel:SetNoDraw( true )
 	
@@ -138,7 +155,8 @@ function DakiMenu:AddHistoryObject( Front, Back )
 	ListItem:SetSize( 83, 83 )
 	ListItem:SetText("")
 	
-	for Id, Text in pairs({ Front, Back }) do
+	
+	for Id, Text in pairs({ Data.Front, Data.Back }) do
 		if( Text ~= "" )then
 			Dakimakuras.LoadImg( Text, function( Mat )
 				if( IsValid( DakiModel ) )then
@@ -149,19 +167,20 @@ function DakiMenu:AddHistoryObject( Front, Back )
 	end
 	
 	ListItem.DoClick = function()
-		self.FrontEntry:SetValue( Front )
-		self.BackEntry:SetValue( Back )
+		self.FrontEntry:SetValue( Data.Front )
+		self.BackEntry:SetValue( Data.Back )
+		self.IsNSFW:SetValue( Data.IsNSFW )
 		self:UpdateDaki()
 	end 
 	
 	ListItem.DoRightClick = function()
 		local Menu = DermaMenu()
 		Menu:AddOption("Remove", function()
-			Dakimakuras.RemoveDaki( Front, Back, true )
+			Dakimakuras.RemoveDaki( Data.Front, Data.Back, true )
 			self.History:Clear()
 			
 			for _, Data in pairs( Dakimakuras.History ) do
-				self:AddHistoryObject( Data.Front, Data.Back )
+				self:AddHistoryObject( Data )
 			end			
 		end)
 		

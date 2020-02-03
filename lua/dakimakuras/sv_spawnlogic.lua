@@ -9,7 +9,7 @@ net.Receive("dakimakuras-net", function( Len, Player )
 	local EyeTrace = Player:GetEyeTrace()
 	
 	if( CanSpawn == nil or CanSpawn == true )then
-		local Front, Back = net.ReadString(), net.ReadString()
+		local Front, Back, IsNSFW = net.ReadString(), net.ReadString(), net.ReadBool()
 		local Daki = ents.Create("prop_dakimakura")
 		Daki:SetPos( EyeTrace.HitPos + EyeTrace.HitNormal * 50 )
 		Daki:SetDegenerate( Player:SteamID() )
@@ -17,6 +17,7 @@ net.Receive("dakimakuras-net", function( Len, Player )
 		Daki:PhysWake()
 		
 		timer.Simple( .05, function()
+			Daki:SetIsNSFW( IsNSFW )
 			Daki:SetFrontImage( Front )
 			Daki:SetBackImage( Back )
 		end)
