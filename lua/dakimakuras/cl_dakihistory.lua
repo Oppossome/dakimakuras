@@ -66,7 +66,7 @@ cvars.AddChangeCallback("dakimakura_enable", function( Name, Old, New )
 	end
 end)
 
-CreateClientConVar("dakimakura_nsfw", "1", true, false, "Disable this for when the pillows become too hot to handle")
+CreateClientConVar("dakimakura_nsfw", "0", true, false, "Disable this for when the pillows become too hot to handle")
 cvars.AddChangeCallback("dakimakura_nsfw", function( Name, Old, New )
 	for _, ent in pairs( ents.FindByClass("prop_dakimakura") )do
 		ent:UpdateImages()
