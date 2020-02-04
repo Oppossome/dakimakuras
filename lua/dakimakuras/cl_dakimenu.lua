@@ -13,7 +13,7 @@ function DakiMenu:Init()
 		net.Start("dakimakuras-net")
 			net.WriteString( self.FrontEntry:GetValue() )
 			net.WriteString( self.BackEntry:GetValue() )
-			net.WriteBool( self.IsNSFW:GetValue() )
+			net.WriteBool( self.IsNSFW:GetChecked() )
 		net.SendToServer()
 		
 		Dakimakuras.RegisterDaki( self.FrontEntry:GetValue(), self.BackEntry:GetValue(), self.IsNSFW:GetChecked() )
