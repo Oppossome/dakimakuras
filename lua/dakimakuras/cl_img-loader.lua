@@ -17,7 +17,7 @@ end
 // I aim to please ( ͡  ͜ʖ ͡ )
 // https://www.desmos.com/calculator/farhkduf39
 local function NearestPow2( Number )
-	return 2 ^ math.Round( math.log( Number, 2 ) )
+	return 2 ^ math.ceil( math.log( Number, 2 ) )
 end
 
 local Queue = {}
