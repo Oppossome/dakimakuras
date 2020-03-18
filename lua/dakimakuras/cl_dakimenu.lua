@@ -14,6 +14,7 @@ function DakiMenu:Init()
 			net.WriteString( self.FrontEntry:GetValue() )
 			net.WriteString( self.BackEntry:GetValue() )
 			net.WriteBool( self.IsNSFW:GetChecked() )
+			net.WriteBool( self.IsFloppy:GetChecked() )
 		net.SendToServer()
 		
 		Dakimakuras.RegisterDaki( self.FrontEntry:GetValue(), self.BackEntry:GetValue(), self.IsNSFW:GetChecked() )
@@ -82,6 +83,22 @@ function DakiMenu:Init()
 	
 	self.IsNSFW = self.NSFWPanel:Add("DCheckBox")
 	self.IsNSFW:Dock( LEFT )
+	
+	--> Is Pillow FLOPPY?
+	self.FloppyPanel = self.Builder:Add("DPanel")
+	self.FloppyPanel.Paint = function()  end
+	self.FloppyPanel:SetTall( 15 )
+	self.FloppyPanel:DockMargin( 0, 3, 0, 0 )
+	self.FloppyPanel:Dock( TOP )
+	
+	self.FloppyLabel = self.FloppyPanel:Add("DLabel")
+	self.FloppyLabel:SetTextColor( Color( 0, 0, 0 ) )
+	self.FloppyLabel:SetText("Is Floppy:")
+	self.FloppyLabel:DockMargin( 5, 0, 0, 0 )
+	self.FloppyLabel:Dock( LEFT )
+	
+	self.IsFloppy = self.FloppyPanel:Add("DCheckBox")
+	self.IsFloppy:Dock( LEFT )
 	
 	--> Start of history tab
 	self.HistoryTab = self.Switcher:Add("DPanel")
