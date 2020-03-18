@@ -5,50 +5,23 @@ ENT.Information = "A bodypillow"
 ENT.Category = "Fun + Games"
 ENT.Author = "Sera"
 
-ENT.Spawnable = true
-ENT.Base = "base_gmodentity"
-ENT.Type = "point" // this is more of a controller than it is the actual entity now
+ENT.Spawnable = false
+ENT.Base = "base_anim"
+ENT.Type = "anim"
 
 function ENT:Initialize()
 	if( SERVER )then
-	
-		local rag = ents.Create( "prop_ragdoll" )
-		if ( !IsValid( rag ) ) then return end // Check whether we successfully made an entity, if not - bail
-		rag:SetModel("models/dakimakura/daki.mdl")
-		rag:SetPos( self:GetPos() )
-		rag:SetAngles( self:GetAngles() )
-		rag:Spawn()
-		rag:Activate()
-		self:SetRagdoll(rag)
-		self:SetLastUsed(CurTime())
-		self.ragdoll = rag // for server to bail if they remove it
-		rag.TimeOffset = 0
-		rag.controller = self
-		rag.isDaki = true
-		rag.lastUsed = CurTime()
-		rag:CPPISetOwner( self.Owner )
-		
-	else
-		self.ScaleFactor = 1
-		self.LastUsed = CurTime()
-		self.Squishing = false
+		self:SetModel("models/dakimakura/daki.mdl")
+		self:SetMoveType(MOVETYPE_VPHYSICS)
+		self:PhysicsInit(SOLID_VPHYSICS)
+		self:SetSolid(SOLID_VPHYSICS)
+		self:SetUseType(SIMPLE_USE)
 	end
-
-end
-
-function ENT:OnRemove()
-
-	if(IsValid(self.ragdoll))then
-		self.ragdoll:Remove()
-	end
-
 end
 
 function ENT:SpawnFunction( Ply )
 	net.Start("dakimakuras-net")
 	net.Send( Ply )
-	self.Owner = Ply
-	self.spawnTime = CurTime()
 end
 
 function ENT:SetupDataTables()
@@ -56,8 +29,7 @@ function ENT:SetupDataTables()
 	self:NetworkVar( "String", 1, "BackImage" )
 	self:NetworkVar( "String", 2, "Degenerate" )
 	self:NetworkVar( "Bool", 3, "IsNSFW" )
-	self:NetworkVar( "Entity", 4, "Ragdoll" )
-	self:NetworkVar( "Float", 5, "LastUsed" )	
+	
 	if( SERVER )then  return  end
 	self:NetworkVarNotify( "FrontImage", self.OnVarChanged )
 	self:NetworkVarNotify( "BackImage", self.OnVarChanged )
@@ -74,45 +46,25 @@ function ENT:ShouldRender()
 	return true
 end
 
-function ENT:GetSelf()
-	return self.ragdoll
-end
-
 function ENT:UpdateImages()
 	if( SERVER )then  return  end
+	
+	
 	for Id, Url in pairs({ self:GetFrontImage(), self:GetBackImage() }) do	
 		Dakimakuras.LoadImg( Url, function( Mat )
-			local rag = self:GetRagdoll()
-			if( IsValid(rag) ) then
-				if( true or self:ShouldRender() )then
-					rag:SetSubMaterial( Id - 1, Mat )
+			if( IsValid( self ) )then				
+				if( self:ShouldRender() )then
+					self:SetSubMaterial( Id - 1, Mat )
 				else
-					rag:SetSubMaterial( Id - 1, "" )
+					self:SetSubMaterial( Id - 1, "" )
 				end
-			else
-				return CurTime() + .5
 			end
 		end)
 	end
 end
 
-function UpdateBones( ent, scale ) // do NOT call on server!
-
-	for bone = 0, 3 do
-		ent:ManipulateBoneScale( bone, Vector( scale, scale, scale ) )
-	end
-
-end
-
-local function lerp( a, b, p )
-	return a*p + b*(1-p)
-end
-
 function ENT:Think()
-
 	if( CLIENT )then
-	
-	
 		local IsDormant = self:IsDormant()
 		if( IsDormant ~= self.DakiDormant )then
 			self.DakiDormant = IsDormant
@@ -121,42 +73,19 @@ function ENT:Think()
 				self.NeedUpdate = CurTime() + .5
 			end
 		end
+		
 		if( self.NeedUpdate and self.NeedUpdate < CurTime() )then
-			self.NeedUpdate = self:UpdateImages()
-		end
-		
-		
-		
-		if( self.LastUsed != self:GetLastUsed() ) then // thonk a bit
-			local lastServerUse = self:GetLastUsed()
-			local dt = lastServerUse - self.LastUsed // derivative gang
-			if( dt > 0.05 ) then // we can safely assume this is the tick the player started holding e on
-				self:GetRagdoll():EmitSound( "player/footsteps/snow1.wav" )
-				self.Squishing = true
-			end
-			self.LastUsed = lastServerUse
-		else
-			if( self.LastUsed < CurTime()+0.01 and self.Squishing ) then
-				self.Squishing = false
-				self:GetRagdoll():EmitSound( "player/footsteps/snow3.wav" )
-			end
-		end
-		
-		local squished = (0.9 + math.Clamp( CurTime() - self:GetLastUsed(), 0, 0.2 )/2 )
-		self.ScaleFactor = lerp( self.ScaleFactor, squished, 0.95 )
-
-		UpdateBones( self:GetRagdoll(), self.ScaleFactor )
-
-		
-	else
-	
-		if( !IsValid(self.ragdoll) ) then
-			self:Remove()
+			self.NeedUpdate = nil
+			self:UpdateImages()
 		end
 	end
-	
 end
 
+function ENT:Use( Activator )
+	if( IsValid( Activator ) and Activator:IsPlayer() )then
+		Activator:PickupObject( self )
+	end
+end
 
 function ENT:PostEntityPaste( Player )
 	self:SetDegenerate( Player:SteamID() )

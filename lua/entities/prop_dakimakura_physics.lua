@@ -5,13 +5,13 @@ ENT.Information = "A bodypillow"
 ENT.Category = "Fun + Games"
 ENT.Author = "Sera"
 
-ENT.Spawnable = false
+ENT.Spawnable = true
 ENT.Base = "base_gmodentity"
-ENT.Type = "point"
-
+ENT.Type = "point" // this is more of a controller than it is the actual entity now
 
 function ENT:Initialize()
 	if( SERVER )then
+	
 		local rag = ents.Create( "prop_ragdoll" )
 		if ( !IsValid( rag ) ) then return end // Check whether we successfully made an entity, if not - bail
 		rag:SetModel("models/dakimakura/daki_phys.mdl")
@@ -20,10 +20,20 @@ function ENT:Initialize()
 		rag:Spawn()
 		rag:Activate()
 		self:SetRagdoll(rag)
+		self:SetLastUsed(CurTime())
 		self.ragdoll = rag // for server to bail if they remove it
+		rag.TimeOffset = 0
+		rag.controller = self
+		rag.isDaki = true
+		rag.lastUsed = CurTime()
 		rag:CPPISetOwner( self.Owner )
 		
+	else
+		self.ScaleFactor = 1
+		self.LastUsed = CurTime()
+		self.Squishing = false
 	end
+
 end
 
 function ENT:OnRemove()
@@ -34,13 +44,20 @@ function ENT:OnRemove()
 
 end
 
+function ENT:SpawnFunction( Ply )
+	net.Start("dakimakuras-net")
+	net.Send( Ply )
+	self.Owner = Ply
+	self.spawnTime = CurTime()
+end
+
 function ENT:SetupDataTables()
 	self:NetworkVar( "String", 0, "FrontImage" )
 	self:NetworkVar( "String", 1, "BackImage" )
 	self:NetworkVar( "String", 2, "Degenerate" )
 	self:NetworkVar( "Bool", 3, "IsNSFW" )
 	self:NetworkVar( "Entity", 4, "Ragdoll" )
-	
+	self:NetworkVar( "Float", 5, "LastUsed" )	
 	if( SERVER )then  return  end
 	self:NetworkVarNotify( "FrontImage", self.OnVarChanged )
 	self:NetworkVarNotify( "BackImage", self.OnVarChanged )
@@ -79,9 +96,23 @@ function ENT:UpdateImages()
 	end
 end
 
+function UpdateBones( ent, scale ) // do NOT call on server!
+
+	for bone = 0, 3 do
+		ent:ManipulateBoneScale( bone, Vector( scale, scale, scale ) )
+	end
+
+end
+
+local function lerp( a, b, p )
+	return a*p + b*(1-p)
+end
+
 function ENT:Think()
 
 	if( CLIENT )then
+	
+	
 		local IsDormant = self:IsDormant()
 		if( IsDormant ~= self.DakiDormant )then
 			self.DakiDormant = IsDormant
@@ -93,7 +124,32 @@ function ENT:Think()
 		if( self.NeedUpdate and self.NeedUpdate < CurTime() )then
 			self.NeedUpdate = self:UpdateImages()
 		end
+		
+		
+		
+		if( self.LastUsed != self:GetLastUsed() ) then // thonk a bit
+			local lastServerUse = self:GetLastUsed()
+			local dt = lastServerUse - self.LastUsed // derivative gang
+			if( dt > 0.05 ) then // we can safely assume this is the tick the player started holding e on
+				self:GetRagdoll():EmitSound( "player/footsteps/snow1.wav" )
+				self.Squishing = true
+			end
+			self.LastUsed = lastServerUse
+		else
+			if( self.LastUsed < CurTime()+0.01 and self.Squishing ) then
+				self.Squishing = false
+				self:GetRagdoll():EmitSound( "player/footsteps/snow3.wav" )
+			end
+		end
+		
+		local squished = (0.9 + math.Clamp( CurTime() - self:GetLastUsed(), 0, 0.2 )/2 )
+		self.ScaleFactor = lerp( self.ScaleFactor, squished, 0.95 )
+
+		UpdateBones( self:GetRagdoll(), self.ScaleFactor )
+
+		
 	else
+	
 		if( !IsValid(self.ragdoll) ) then
 			self:Remove()
 		end
