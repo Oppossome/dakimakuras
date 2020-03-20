@@ -1,7 +1,7 @@
 Dakimakuras = Dakimakuras or {}
 Dakimakuras.ImgCache = Dakimakuras.ImgCache or {}
 
--- Send help, this is painfully hacky
+--[[ Send help, this is painfully hacky
 local function NearestPow2( Number )
 	for i = 1, 200 do
 		if( 2 ^ i > Number )then
@@ -10,6 +10,13 @@ local function NearestPow2( Number )
 	end
 	
 	return 0
+end
+]]--
+
+-- I aim to please ( ͡  ͜ʖ ͡ )
+-- https://www.desmos.com/calculator/farhkduf39
+local function NearestPow2( Number )
+	return 2 ^ math.ceil( math.log( Number, 2 ) )
 end
 
 local Queue = {}

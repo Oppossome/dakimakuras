@@ -14,8 +14,8 @@ function DakiMenu:Init()
 			net.WriteString( self.FrontEntry:GetValue() )
 			net.WriteString( self.BackEntry:GetValue() )
 			net.WriteBool( self.IsNSFW:GetChecked() )
+			net.WriteBool( self.IsFloppy:GetChecked() )
 		net.SendToServer()
-		
 		Dakimakuras.RegisterDaki( self.FrontEntry:GetValue(), self.BackEntry:GetValue(), self.IsNSFW:GetChecked() )
 		self:Close()
 	end
@@ -44,7 +44,8 @@ function DakiMenu:Init()
 	self.FrontText:SetTextColor( Color( 0, 0, 0 ) )
 	self.FrontText:DockMargin( 5, 0, 0, 0 )
 	self.FrontText:Dock( LEFT )
-	
+	self.FrontText:SetWide(40)
+
 	self.FrontEntry = self.Front:Add("DTextEntry")
 	self.FrontEntry:DockMargin( 0, 3, 3, 3 )
 	self.FrontEntry:Dock( FILL )
@@ -59,6 +60,7 @@ function DakiMenu:Init()
 	self.BackText:SetTextColor( Color( 0, 0, 0 ) )
 	self.BackText:DockMargin( 5, 0, 0, 0 )
 	self.BackText:Dock( LEFT )
+	self.BackText:SetWide(40)
 
 	self.BackEntry = self.Back:Add("DTextEntry")
 	self.BackEntry:DockMargin( 0, 3, 3, 3 )
@@ -71,17 +73,30 @@ function DakiMenu:Init()
 	self.NSFWPanel = self.Builder:Add("DPanel")
 	self.NSFWPanel.Paint = function()  end
 	self.NSFWPanel:SetTall( 15 )
-	self.NSFWPanel:DockMargin( 0, 3, 0, 0 )
+	self.NSFWPanel:DockMargin( 0, 5, 0, 0 )
 	self.NSFWPanel:Dock( TOP )
 	
 	self.NSFWLabel = self.NSFWPanel:Add("DLabel")
+	self.NSFWLabel:SetWide(48)
 	self.NSFWLabel:SetTextColor( Color( 0, 0, 0 ) )
-	self.NSFWLabel:SetText("Is NSFW:")
+	self.NSFWLabel:SetText("Is NSFW")
 	self.NSFWLabel:DockMargin( 5, 0, 0, 0 )
 	self.NSFWLabel:Dock( LEFT )
-	
+
 	self.IsNSFW = self.NSFWPanel:Add("DCheckBox")
+	self.IsNSFW:DockMargin( 0, 0, 0, 0 )
 	self.IsNSFW:Dock( LEFT )
+
+	self.FloppyLabel = self.NSFWPanel:Add("DLabel")
+	self.FloppyLabel:SetWide(74)
+	self.FloppyLabel:SetTextColor( Color( 0, 0, 0 ) )
+	self.FloppyLabel:SetText("Spawn Floppy ")
+	self.FloppyLabel:DockMargin( 20, 0, 0, 0 )
+	self.FloppyLabel:Dock( LEFT )
+
+	self.IsFloppy = self.NSFWPanel:Add("DCheckBox")
+	self.IsFloppy:DockMargin( 0, 0, 0, 0 )
+	self.IsFloppy:Dock( LEFT )
 	
 	--> Start of history tab
 	self.HistoryTab = self.Switcher:Add("DPanel")
@@ -167,6 +182,7 @@ function DakiMenu:AddHistoryObject( Data )
 	end
 	
 	ListItem.DoClick = function()
+		surface.PlaySound("garrysmod/ui_click.wav")
 		self.FrontEntry:SetValue( Data.Front )
 		self.BackEntry:SetValue( Data.Back )
 		self.IsNSFW:SetValue( Data.IsNSFW )
@@ -192,6 +208,12 @@ function DakiMenu:AddHistoryObject( Data )
 	end
 	
 	ListItem.Paint = function( Self, Width, Height )
+
+		if( Self:IsHovered() and !Self.wasHovered ) then
+			surface.PlaySound("garrysmod/ui_hover.wav") -- ui sounds are nice
+		end
+		Self.wasHovered = Self:IsHovered()
+
 		local Left, Top = ListItem:LocalToScreen( 0, 0 )
 		local Right, Bottom = ListItem:LocalToScreen( 83, 83 )
 		local Current = Self

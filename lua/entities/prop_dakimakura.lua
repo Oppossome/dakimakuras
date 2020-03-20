@@ -5,7 +5,7 @@ ENT.Information = "A bodypillow"
 ENT.Category = "Fun + Games"
 ENT.Author = "Sera"
 
-ENT.Spawnable = true
+ENT.Spawnable = false
 ENT.Base = "base_anim"
 ENT.Type = "anim"
 
