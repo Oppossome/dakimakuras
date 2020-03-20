@@ -1,26 +1,24 @@
 if( SERVER )then  util.AddNetworkString("dakimakuras-net")  end
 
-local function AInclude( File )
-	local Context = select(3, File:reverse():find(".-_(%w+)"))
-	File = "dakimakuras/"..File
+local function AInclude( file )
+	local context = string.find(file, "(%w+)_.-%.lua")
+	file = "dakimakuras/"..file
 	
-	if( Context )then
-		Context = Context:reverse():lower()
-		
-		if( Context == "sh" or Context == "cl" )then
-			AddCSLuaFile( File )
+	if context then
+		if context == "sh" or context == "cl" then
+			AddCSLuafile( file )
 		end
 		
-		if( Context == "sv" and SERVER )then
-			include( File )
+		if context == "sv" and SERVER then
+			include( file )
 		end
 		
-		if( Context == "cl" and CLIENT )then
-			include( File )
+		if context == "cl" and CLIENT then
+			include( file )
 		end
 		
-		if( Context == "sh" )then
-			include( File )
+		if context == "sh" then
+			include( file )
 		end
 	end
 end
