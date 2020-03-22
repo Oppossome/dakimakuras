@@ -1,22 +1,22 @@
-if( SERVER )then  util.AddNetworkString("dakimakuras-net")  end
+if SERVER then  util.AddNetworkString("dakimakuras-net") end
 
 local function AInclude( file )
-	local context = string.find(file, "(%w+)_.-%.lua")
-	file = "dakimakuras/"..file
-	
+	local context = string.match(file, "(%w+)_.-%.lua")
+	file = "dakimakuras/" .. file
+
 	if context then
 		if context == "sh" or context == "cl" then
-			AddCSLuafile( file )
+			AddCSLuaFile( file )
 		end
-		
+
 		if context == "sv" and SERVER then
 			include( file )
 		end
-		
+
 		if context == "cl" and CLIENT then
 			include( file )
 		end
-		
+
 		if context == "sh" then
 			include( file )
 		end
