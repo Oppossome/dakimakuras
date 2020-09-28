@@ -132,8 +132,8 @@ function ENT:Think()
 			self.NeedUpdate = self:UpdateImages()
 		end
 		
-		local squished = (0.9 + math.Clamp( CurTime() - self:GetLastUsed(), 0, 0.2 )/2 )
-		self.ScaleFactor = lerp( self.ScaleFactor, squished, 0.95 )
+		local squished = (0.8 + math.Clamp( CurTime() - self:GetLastUsed(), 0.1, 0.3 )/2 )
+		self.ScaleFactor = lerp( self.ScaleFactor, squished, 0.99 )
 
 		UpdateBones( self:GetRagdoll(), self.ScaleFactor )
 
