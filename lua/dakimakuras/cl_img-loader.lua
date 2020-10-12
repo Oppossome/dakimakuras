@@ -3,13 +3,8 @@ Dakimakuras.ImgCache = Dakimakuras.ImgCache or {}
 
 -- Send help, this is painfully hacky
 local function NearestPow2( Number )
-	for i = 1, 200 do
-		if( 2 ^ i > Number )then
-			return 2 ^ i
-		end
-	end
+	return 2 ^ math.ceil( math.log( Number, 2 ) )
 	
-	return 0
 end
 
 local Queue = {}
