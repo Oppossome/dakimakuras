@@ -8,7 +8,7 @@ function Dakimakuras.RemoveDaki( Front, Back, ShouldSave )
 			table.remove( Dakimakuras.History, Ind )
 		end
 	end
-	
+
 	if( ShouldSave )then
 		Dakimakuras.Save()
 	end
@@ -16,20 +16,24 @@ end
 
 function Dakimakuras.RegisterDaki( Front, Back, IsNSFW )
 	Dakimakuras.RemoveDaki( Front, Back )
-	
+
 	table.insert(Dakimakuras.History, 1, {
 		["IsNSFW"] = IsNSFW;
 		["Front"] = Front;
 		["Back"] = Back;
 	})
-	
+
+    if IsNSFW then
+        RunConsoleCommand("dakimakura_nsfw", 1)
+    end
+
 	Dakimakuras.Save()
 end
 
 function Dakimakuras.BlacklistUser( SteamId, Bool )
 	Dakimakuras.Blacklist[ SteamId ] = ( Bool == true and true or nil )
 	Dakimakuras.Save()
-	
+
 	for _, ent in pairs( ents.FindByClass("prop_dakimakura") )do
 		if( ent:GetDegenerate() == SteamId )then
 			ent:UpdateImages()
@@ -49,7 +53,7 @@ function Dakimakuras.Load()
 	local RawHistory = cookie.GetString("daki-history", "{}" )
 	Dakimakuras.Blacklist = util.JSONToTable( RawBlacklist )
 	Dakimakuras.History = util.JSONToTable( RawHistory )
-	
+
 	for _, Dakimakura in pairs( Dakimakuras.History ) do
 		Dakimakura.IsNSFW = (Dakimakura.IsNSFW ~= nil and Dakimakura.IsNSFW or false )
 		Dakimakura.Front = Dakimakura.Front or ""
